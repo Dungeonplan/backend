@@ -1,2 +1,4 @@
 backend
 backend.exe
+setup_env.sh
+go.sum
