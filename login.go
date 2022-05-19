@@ -17,7 +17,7 @@ type DiscordLoginResponse struct {
 	Avatar   string `json:"avatar"`
 	Locale   string `json:"locale"`
 	EMail    string `json:"email"`
-	Verified bool   `json:"verified"`
+	//Verified bool   `json:"verified"`
 	//AvatarDecoration string `json:"avatar_decoration"`
 	//Discriminator    string `json:"discriminator"`
 	//PublicFlags      int    `json:"public_flags"`
@@ -73,11 +73,6 @@ func (env *Env) handleLoginDiscordCallback(w http.ResponseWriter, r *http.Reques
 		var result DiscordLoginResponse
 		if err := json.Unmarshal(body, &result); err != nil {
 			panic("Could not parse answer from Discord API: " + err.Error())
-		}
-
-		if !result.Verified {
-			//TODO: User not verified
-			fmt.Fprintf(w, "User can't login. Verify E-Mail first.")
 		}
 
 		rows, err = env.database.Query("SELECT COUNT(*) FROM user WHERE email = ?", result.EMail)
