@@ -37,7 +37,7 @@ func main() {
 		}
 	}()
 
-	http.HandleFunc("/logindiscord", env.handleLoginDiscord)
-	http.HandleFunc("/logindiscordcallback", env.handleLoginDiscordCallback)
+	http.HandleFunc("/api/logindiscord", env.handleLoginDiscord)
+	http.HandleFunc("/api/logindiscordcallback", env.handleLoginDiscordCallback)
 	http.ListenAndServe(":8123", nil)
 }
