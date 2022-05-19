@@ -38,10 +38,6 @@ func (env *Env) handleLoginDiscord(w http.ResponseWriter, r *http.Request) {
 	stmt.Exec(sso_service_discord, state, time.Now().Unix())
 	checkErr(err)
 
-	if err != nil {
-		http.Redirect(w, r, errorPageURL, http.StatusTemporaryRedirect)
-	}
-
 	//TODO: Add check if running on dev or prod
 	url := discordOAuthConfigProd.AuthCodeURL(state)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
