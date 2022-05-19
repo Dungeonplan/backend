@@ -7,8 +7,12 @@ import (
 )
 
 const (
-	baseURL      = "http://test.dungeonplan.de"
+	baseURL      = "https://test.dungeonplan.de"
 	errorPageURL = baseURL + "/error"
+)
+
+const (
+	sso_service_discord = 1
 )
 
 var (
@@ -16,7 +20,7 @@ var (
 		RedirectURL:  "http://localhost:8123/logindiscordcallback",
 		ClientID:     os.Getenv("DUNGEONPLAN_DISCORD_CLIENT_ID"),
 		ClientSecret: os.Getenv("DUNGEONPLAN_DISCORD_CLIENT_SECRET"),
-		Scopes:       []string{"email", "identify"},
+		Scopes:       []string{"email"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://discord.com/api/oauth2/authorize",
 			TokenURL: "https://discord.com/api/oauth2/token",
@@ -26,14 +30,10 @@ var (
 		RedirectURL:  baseURL + "logindiscordcallback",
 		ClientID:     os.Getenv("DUNGEONPLAN_DISCORD_CLIENT_ID"),
 		ClientSecret: os.Getenv("DUNGEONPLAN_DISCORD_CLIENT_SECRET"),
-		Scopes:       []string{"email", "identify"},
+		Scopes:       []string{"email"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://discord.com/api/oauth2/authorize",
 			TokenURL: "https://discord.com/api/oauth2/token",
 		},
 	}
-)
-
-const (
-	sso_service_discord = 1
 )
