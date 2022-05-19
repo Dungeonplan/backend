@@ -27,7 +27,7 @@ var (
 		},
 	}
 	discordOAuthConfigProd = &oauth2.Config{
-		RedirectURL:  baseURL + "logindiscordcallback",
+		RedirectURL:  baseURL + "/api/logindiscordcallback",
 		ClientID:     os.Getenv("DUNGEONPLAN_DISCORD_CLIENT_ID"),
 		ClientSecret: os.Getenv("DUNGEONPLAN_DISCORD_CLIENT_SECRET"),
 		Scopes:       []string{"email"},
