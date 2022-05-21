@@ -32,7 +32,7 @@ func (env *Env) handleLoginDiscord(w http.ResponseWriter, r *http.Request) {
 	state, err := security.GenerateRandomString(32)
 	checkErr(err)
 
-	stmt, err := env.database.Prepare("INSERT INTO auth_in_progress(sso_service, state, timestamp) VALUES (?, ?, ?);")
+	stmt, err := env.database.Prepare("INSERT INTO oauth2_state(sso_service, state, timestamp) VALUES (?, ?, ?);")
 	checkErr(err)
 
 	stmt.Exec(sso_service_discord, state, time.Now().Unix())
@@ -51,11 +51,11 @@ func (env *Env) handleLoginDiscord(w http.ResponseWriter, r *http.Request) {
 func (env *Env) handleLoginDiscordCallback(w http.ResponseWriter, r *http.Request) {
 	state := r.FormValue("state")
 	code := r.FormValue("code")
-	rows, err := env.database.Query("SELECT COUNT(*) FROM auth_in_progress WHERE state = ?", state)
+	rows, err := env.database.Query("SELECT COUNT(*) FROM oauth2_state WHERE state = ?", state)
 	checkErr(err)
 
 	if checkRowsCount(rows) == 1 {
-		stmt, err := env.database.Prepare("DELETE FROM auth_in_progress WHERE state = ?")
+		stmt, err := env.database.Prepare("DELETE FROM oauth2_state WHERE state = ?")
 		checkErr(err)
 		_, err = stmt.Exec(state)
 		checkErr(err)
