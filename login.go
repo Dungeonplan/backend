@@ -31,7 +31,11 @@ type DiscordLoginResponse struct {
 }
 
 func (env *Env) handleLoginDiscord(w http.ResponseWriter, r *http.Request) {
-	//TODO: Allow only GET
+	// Accept only GET
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
 	state, err := security.GenerateRandomString(32)
 	checkErr(err)
 
@@ -52,7 +56,11 @@ func (env *Env) handleLoginDiscord(w http.ResponseWriter, r *http.Request) {
 }
 
 func (env *Env) handleLoginDiscordCallback(w http.ResponseWriter, r *http.Request) {
-	//TODO: allow only GET
+	// Accept only GET
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
 	state := r.FormValue("state")
 	code := r.FormValue("code")
 	rows, err := env.database.Query("SELECT COUNT(*) FROM oauth2_state WHERE state = ?", state)
