@@ -1,6 +1,9 @@
 package main
 
-import "database/sql"
+import (
+	"database/sql"
+	"strings"
+)
 
 func checkErr(err error) {
 	if err != nil {
@@ -14,4 +17,8 @@ func checkRowsCount(rows *sql.Rows) (count int) {
 		checkErr(err)
 	}
 	return count
+}
+
+func extractBearerToken(authorizationString string) string {
+	return strings.Replace(authorizationString, "Bearer ", "", 1)
 }

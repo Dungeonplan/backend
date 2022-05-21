@@ -19,15 +19,52 @@ type DiscordLoginResponse struct {
 	Avatar   string `json:"avatar"`
 	Locale   string `json:"locale"`
 	EMail    string `json:"email"`
-	//Verified bool   `json:"verified"`
-	//AvatarDecoration string `json:"avatar_decoration"`
-	//Discriminator    string `json:"discriminator"`
-	//PublicFlags      int    `json:"public_flags"`
-	//Flags            int    `json:"flags"`
-	//Banner           string `json:"banner"`
-	//BannerColor      string `json:"banner_color"`
-	//AccentColor      int    `json:"accent_color"`
-	//MFAEnabled       bool   `json:"mfa_eabled"`
+}
+
+type TokenExchangeResponse struct {
+	Token string `json:"token"`
+}
+
+type Claims struct {
+	UserID int `json:"userid"`
+	jwt.StandardClaims
+}
+
+func (env *Env) authorized(w http.ResponseWriter, r *http.Request) bool {
+	jwtToken := extractBearerToken(r.Header.Get("Authorization"))
+
+	// Return 401 if no Token was submitted
+	if jwtToken == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		return false
+	}
+
+	claims := &Claims{}
+
+	token, err := jwt.ParseWithClaims(jwtToken, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("DUNGEONPLAN_PRESHARED_KEY")), nil
+	})
+
+	if err != nil {
+		// Return 401 if signature is invalid, expired, etc.
+		w.WriteHeader(http.StatusUnauthorized)
+		return false
+	}
+
+	// Return 401 if token was invalidated before
+	if !token.Valid || env.wasTokenInvalidated(jwtToken) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return false
+	}
+
+	return true
+}
+
+func (env *Env) wasTokenInvalidated(token string) bool {
+	var valid bool
+	row := env.database.QueryRow("SELECT valid FROM jwt_token WHERE jwt_token = ?", token)
+	row.Scan(&valid)
+	return !valid
 }
 
 func (env *Env) handleLoginDiscord(w http.ResponseWriter, r *http.Request) {
@@ -138,11 +175,7 @@ func (env *Env) handleLoginDiscordCallback(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-type TokenExchangeResponse struct {
-	Token string `json:"token"`
-}
-
-func (env *Env) tokenExchange(w http.ResponseWriter, r *http.Request) {
+func (env *Env) handleTokenExchange(w http.ResponseWriter, r *http.Request) {
 	//Accept only POST
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -198,11 +231,6 @@ func (env *Env) tokenExchange(w http.ResponseWriter, r *http.Request) {
 
 		w.WriteHeader(http.StatusUnauthorized)
 		return
-	}
-
-	type Claims struct {
-		UserID int `json:"userid"`
-		jwt.StandardClaims
 	}
 
 	// Create new JWT Token
