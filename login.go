@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -88,18 +87,38 @@ func (env *Env) handleLoginDiscordCallback(w http.ResponseWriter, r *http.Reques
 		rows, err = env.database.Query("SELECT COUNT(*) FROM user WHERE email = ?", result.EMail)
 		checkErr(err)
 
-		if checkRowsCount(rows) == 1 {
-			//TODO: User exists
-			fmt.Fprintf(w, "User was successfully logged in.")
-		} else {
+		var userID int64 = -1
+
+		if checkRowsCount(rows) == 0 {
 			stmt, err := env.database.Prepare("INSERT INTO user(email, username, discordid, discordavatar, locale) VALUES (?, ?, ?, ?, ?);")
 			checkErr(err)
-			stmt.Exec(result.EMail, result.Username, result.ID, result.Avatar, result.Locale)
+			result, err := stmt.Exec(result.EMail, result.Username, result.ID, result.Avatar, result.Locale)
 			checkErr(err)
-			//TODO: Finish registration
-			fmt.Fprintf(w, "User was successfully registered.")
+			userID, err = result.LastInsertId()
+			checkErr(err)
+		} else {
+			rows, err := env.database.Query("SELECT id FROM user WHERE email = ?", result.EMail)
+			checkErr(err)
+			for rows.Next() {
+				err := rows.Scan(&userID)
+				checkErr(err)
+			}
+		}
+		stmt, err = env.database.Prepare("INSERT INTO authorize_token(token, user_id, expiry) VALUES (?, ?, ?);")
+		checkErr(err)
+		auth_token, err := security.GenerateRandomString(32)
+		checkErr(err)
+
+		// If user could not be added, for some reason. Should not happen
+		if userID == -1 {
+			http.Redirect(w, r, errorPageURL, http.StatusTemporaryRedirect)
+			return
 		}
 
+		//TODO: Reduce Expiry
+		stmt.Exec(auth_token, userID, time.Now().Add(time.Minute*time.Duration(5)).Unix())
+		checkErr(err)
+		http.Redirect(w, r, authorizeURL+auth_token, http.StatusTemporaryRedirect)
 	} else {
 		http.Redirect(w, r, errorPageURL, http.StatusTemporaryRedirect)
 	}
