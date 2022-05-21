@@ -12,26 +12,36 @@ import (
 )
 
 type Env struct {
-	database *sql.DB
+	database    *sql.DB
+	environment string
 }
 
 func init() {
 	security.AssertAvailablePRNG()
 }
 
-func main() {
-
+func setupEnv() *Env {
 	db, err := sql.Open("sqlite3", "./database.sqlite")
 	checkErr(err)
+	dev := os.Getenv("DUNGEONPLAN_ENV")
 
-	env := &Env{database: db}
+	if dev != "prod" {
+		dev = "dev"
+	}
+
+	return &Env{database: db, environment: dev}
+}
+
+func main() {
+
+	env := setupEnv()
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		for sig := range c {
 			fmt.Println(sig.String())
-			db.Close()
+			env.database.Close()
 			// Code sig c
 			os.Exit(130)
 		}

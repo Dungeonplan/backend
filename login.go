@@ -38,8 +38,13 @@ func (env *Env) handleLoginDiscord(w http.ResponseWriter, r *http.Request) {
 	stmt.Exec(sso_service_discord, state, time.Now().Unix())
 	checkErr(err)
 
-	//TODO: Add check if running on dev or prod
-	url := discordOAuthConfigProd.AuthCodeURL(state)
+	var url string
+	if env.environment == "dev" {
+		url = discordOAuthConfigDev.AuthCodeURL(state)
+	} else {
+		url = discordOAuthConfigProd.AuthCodeURL(state)
+	}
+
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
@@ -55,8 +60,13 @@ func (env *Env) handleLoginDiscordCallback(w http.ResponseWriter, r *http.Reques
 		_, err = stmt.Exec(state)
 		checkErr(err)
 
-		//TODO: Add check if running on dev or prod
-		token, err := discordOAuthConfigProd.Exchange(oauth2.NoContext, code)
+		var token *oauth2.Token
+
+		if env.environment == "dev" {
+			token, err = discordOAuthConfigDev.Exchange(oauth2.NoContext, code)
+		} else {
+			token, err = discordOAuthConfigProd.Exchange(oauth2.NoContext, code)
+		}
 		checkErr(err)
 
 		client := &http.Client{}

@@ -17,7 +17,7 @@ const (
 
 var (
 	discordOAuthConfigDev = &oauth2.Config{
-		RedirectURL:  "http://localhost:8123/logindiscordcallback",
+		RedirectURL:  "http://localhost:8123/api/logindiscordcallback",
 		ClientID:     os.Getenv("DUNGEONPLAN_DISCORD_CLIENT_ID"),
 		ClientSecret: os.Getenv("DUNGEONPLAN_DISCORD_CLIENT_SECRET"),
 		Scopes:       []string{"email"},
