@@ -4,18 +4,18 @@ info:
   title: Dungeonplan
   description: Backend API
 paths:
-  /logindiscord:
-    description: Redirect to Discord SSO
+  /api/logindiscord:
     get:
+      summary: Redirect to Discord SSO
       tags: 
         - OAuth2
         - Discord
       responses:
         '307':
           description: Redirect to Discord SSO server.
-  /logindiscordcallback:
-    description: Callback address for Discord SSO.
+  /api/logindiscordcallback:
     get:
+      summary: Callback address for Discord SSO.
       parameters: 
         - in: query
           name: state
@@ -33,3 +33,38 @@ paths:
       responses:
         '307':
           description: Redirect to Dungeonplan after successful or failed login
+  /api/tokenexchange:
+    post:
+      summary: Endpoint to transform discord token to jwt token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenexchangeRequest'
+      tags:
+        - Authorization
+        - OAuth2
+      responses:
+        '401': 
+          description: Token not found, Token already used, Token was expired
+        '200': 
+          description: New JWT Token was successfully created and returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenexchangeResponse'
+components:
+  schemas:
+    TokenexchangeRequest:
+      properties:
+        token:
+          type: string
+    TokenexchangeResponse:
+      properties:
+        token:
+          type: string
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/b1ue/Dungeonplan/1.0
