@@ -13,6 +13,11 @@ const (
 )
 
 const (
+	exchange_token_expiry = 60   // Seconds
+	jwt_expiry            = 3600 // Seconds
+)
+
+const (
 	sso_service_discord = 1
 )
 
