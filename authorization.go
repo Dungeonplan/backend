@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/Dungeonplan/backend/security"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 	"golang.org/x/oauth2"
 )
 
