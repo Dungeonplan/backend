@@ -15,7 +15,7 @@ type SuccessResponse struct {
 
 func checkErr(err error) {
 	if err != nil {
-		panic("An error occured: " + err.Error())
+		log("Error: " + err.Error())
 	}
 }
 

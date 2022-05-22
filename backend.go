@@ -40,7 +40,8 @@ func main() {
 	go func() {
 		for sig := range c {
 			log(sig.String())
-			env.database.Close()
+			err := env.database.Close()
+			checkErr(err)
 			// Code sig c
 			os.Exit(130)
 		}
@@ -50,5 +51,6 @@ func main() {
 	http.HandleFunc("/api/logindiscordcallback", env.handleLoginDiscordCallback)
 	http.HandleFunc("/api/tokenexchange", env.handleTokenExchange)
 	http.HandleFunc("/api/logout", env.handleLogout)
-	http.ListenAndServe(":8123", nil)
+	err := http.ListenAndServe(":8123", nil)
+	checkErr(err)
 }
