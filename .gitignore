@@ -3,3 +3,4 @@ backend.exe
 setup_env.sh
 go.sum
 database.sqlite-journal
+.idea/
