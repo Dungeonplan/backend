@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -247,7 +246,7 @@ func (env *Env) handleTokenExchange(w http.ResponseWriter, r *http.Request) {
 
 	// Return 500 if something went wrong during token creation
 	if err != nil {
-		fmt.Println(err.Error())
+		log("Error: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

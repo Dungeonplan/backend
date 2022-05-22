@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -33,14 +32,14 @@ func setupEnv() *Env {
 }
 
 func main() {
-
+	log("Starting Dungeonplan Backend v" + dungeonplan_version)
 	env := setupEnv()
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		for sig := range c {
-			fmt.Println(sig.String())
+			log(sig.String())
 			env.database.Close()
 			// Code sig c
 			os.Exit(130)

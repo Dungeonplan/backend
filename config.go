@@ -21,6 +21,10 @@ const (
 	sso_service_discord = 1
 )
 
+const (
+	dungeonplan_version = "0.1"
+)
+
 var (
 	discordOAuthConfigDev = &oauth2.Config{
 		RedirectURL:  "http://localhost:8123/api/logindiscordcallback",

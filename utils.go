@@ -2,7 +2,9 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"strings"
+	"time"
 )
 
 //Generic Response for Successes/Fails
@@ -27,4 +29,8 @@ func checkRowsCount(rows *sql.Rows) (count int) {
 
 func extractBearerToken(authorizationString string) string {
 	return strings.Replace(authorizationString, "Bearer ", "", 1)
+}
+
+func log(message string) {
+	fmt.Println(time.Now().Format("02.01.2006 - 15:04:05") + ": " + message)
 }
