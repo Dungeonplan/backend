@@ -276,3 +276,29 @@ func (env *Env) handleTokenExchange(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(json)
 }
+
+func (env *Env) handleLogout(w http.ResponseWriter, r *http.Request) {
+	// Accept only GET
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Return 401 if user is not authorized
+	if !env.authorized(w, r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	jwtToken := extractBearerToken(r.Header.Get("Authorization"))
+	stmt, err := env.database.Prepare("UPDATE jwt_token SET valid = 0 WHERE jwt_token = ?")
+	checkErr(err)
+	_, err = stmt.Exec(jwtToken)
+	checkErr(err)
+
+	body := SuccessResponse{Success: true, Description: "Logout successful."}
+	json, err := json.Marshal(body)
+	checkErr(err)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(json)
+}

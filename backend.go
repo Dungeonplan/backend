@@ -50,5 +50,6 @@ func main() {
 	http.HandleFunc("/api/logindiscord", env.handleLoginDiscord)
 	http.HandleFunc("/api/logindiscordcallback", env.handleLoginDiscordCallback)
 	http.HandleFunc("/api/tokenexchange", env.handleTokenExchange)
+	http.HandleFunc("/api/logout", env.handleLogout)
 	http.ListenAndServe(":8123", nil)
 }

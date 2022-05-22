@@ -5,6 +5,12 @@ import (
 	"strings"
 )
 
+//Generic Response for Successes/Fails
+type SuccessResponse struct {
+	Success     bool   `json:"success"`
+	Description string `json:"description"`
+}
+
 func checkErr(err error) {
 	if err != nil {
 		panic("An error occured: " + err.Error())

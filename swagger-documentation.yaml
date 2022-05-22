@@ -54,7 +54,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TokenexchangeResponse'
+  /api/logout:
+    get:
+      summary: Endpoint to invalidate a jwt token.
+      security: 
+        - BearerAuth: []
+      tags:
+        - Authorization
+      responses:
+        '401':
+          description: No or invalid JWT Token was transmitted
+        '200':
+          description: Invalidation/Logout was successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
   schemas:
     TokenexchangeRequest:
       properties:
@@ -63,6 +83,12 @@ components:
     TokenexchangeResponse:
       properties:
         token:
+          type: string
+    SuccessResponse:
+      properties:
+        success:
+          type: boolean
+        description:
           type: string
 servers:
   # Added by API Auto Mocking Plugin
