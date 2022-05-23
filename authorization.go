@@ -62,7 +62,7 @@ func (env *Env) authorized(w http.ResponseWriter, r *http.Request) bool {
 func (env *Env) wasTokenInvalidated(token string) bool {
 	var valid bool
 	row := env.database.QueryRow("SELECT valid FROM jwt_token WHERE jwt_token = ?", token)
-	row.Scan(&valid)
+	checkErr(row.Scan(&valid))
 	return !valid
 }
 
@@ -157,7 +157,7 @@ func (env *Env) handleLoginDiscordCallback(w http.ResponseWriter, r *http.Reques
 		}
 		stmt, err = env.database.Prepare("INSERT INTO authorize_token(token, user_id, expiry) VALUES (?, ?, ?);")
 		checkErr(err)
-		auth_token, err := security.GenerateRandomString(32)
+		authToken, err := security.GenerateRandomString(32)
 		checkErr(err)
 
 		// If user could not be added, for some reason. Should not happen
@@ -166,9 +166,9 @@ func (env *Env) handleLoginDiscordCallback(w http.ResponseWriter, r *http.Reques
 			return
 		}
 
-		_, err = stmt.Exec(auth_token, userID, time.Now().Add(time.Minute*time.Duration(60)).Unix())
+		_, err = stmt.Exec(authToken, userID, time.Now().Add(time.Minute*time.Duration(60)).Unix())
 		checkErr(err)
-		http.Redirect(w, r, authorizeURL+auth_token, http.StatusTemporaryRedirect)
+		http.Redirect(w, r, authorizeURL+authToken, http.StatusTemporaryRedirect)
 	} else {
 		http.Redirect(w, r, errorPageURL, http.StatusTemporaryRedirect)
 	}
@@ -198,10 +198,10 @@ func (env *Env) handleTokenExchange(w http.ResponseWriter, r *http.Request) {
 
 	rows, err := env.database.Query("SELECT COUNT(*) FROM authorize_token WHERE token = ?", resp.Token)
 	checkErr(err)
-	rows_count := checkRowsCount(rows)
+	rowsCount := checkRowsCount(rows)
 
 	// Return 401 if Token was not found
-	if rows_count == 0 {
+	if rowsCount == 0 {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -270,10 +270,11 @@ func (env *Env) handleTokenExchange(w http.ResponseWriter, r *http.Request) {
 
 	body := JWTResponse{Token: jwtTokenString}
 
-	json, err := json.Marshal(body)
+	jsn, err := json.Marshal(body)
 	checkErr(err)
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(json)
+	_, err = w.Write(jsn)
+	checkErr(err)
 }
 
 func (env *Env) handleLogout(w http.ResponseWriter, r *http.Request) {
@@ -296,8 +297,9 @@ func (env *Env) handleLogout(w http.ResponseWriter, r *http.Request) {
 	checkErr(err)
 
 	body := SuccessResponse{Success: true, Description: "Logout successful."}
-	json, err := json.Marshal(body)
+	jsn, err := json.Marshal(body)
 	checkErr(err)
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(json)
+	_, err = w.Write(jsn)
+	checkErr(err)
 }
