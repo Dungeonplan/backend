@@ -126,7 +126,10 @@ func (env *Env) handleLoginDiscordCallback(w http.ResponseWriter, r *http.Reques
 		response, err := client.Do(request)
 		checkErr(err)
 
-		defer response.Body.Close()
+		defer func() {
+			err = response.Body.Close()
+		}()
+		checkErr(err)
 
 		body, err := ioutil.ReadAll(response.Body)
 		checkErr(err)
@@ -207,13 +210,13 @@ func (env *Env) handleTokenExchange(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var tokenid int
+	var tokenID int
 	var userid int
 	var used bool
 	var expiry int
 
 	row := env.database.QueryRow("SELECT id, user_id, used, expiry FROM authorize_token WHERE token = ?", resp.Token)
-	err = row.Scan(&tokenid, &userid, &used, &expiry)
+	err = row.Scan(&tokenID, &userid, &used, &expiry)
 	checkErr(err)
 
 	// Return 401 if Token was expired
@@ -226,7 +229,7 @@ func (env *Env) handleTokenExchange(w http.ResponseWriter, r *http.Request) {
 	if used {
 		stmt, err := env.database.Prepare("UPDATE jwt_token SET valid = 0 WHERE authorize_token_id = ?")
 		checkErr(err)
-		_, err = stmt.Exec(tokenid)
+		_, err = stmt.Exec(tokenID)
 		checkErr(err)
 
 		w.WriteHeader(http.StatusUnauthorized)
@@ -255,13 +258,13 @@ func (env *Env) handleTokenExchange(w http.ResponseWriter, r *http.Request) {
 	// Add JWT Token to database
 	stmt, err := env.database.Prepare("INSERT INTO jwt_token(user_id, authorize_token_id, jwt_token) VALUES (?, ?, ?);")
 	checkErr(err)
-	_, err = stmt.Exec(userid, tokenid, jwtTokenString)
+	_, err = stmt.Exec(userid, tokenID, jwtTokenString)
 	checkErr(err)
 
 	// Set used to true for authorize_token
 	stmt, err = env.database.Prepare("UPDATE authorize_token SET used = 1 WHERE id = ?")
 	checkErr(err)
-	_, err = stmt.Exec(tokenid)
+	_, err = stmt.Exec(tokenID)
 	checkErr(err)
 
 	//Return JWT Token
