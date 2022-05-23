@@ -18,11 +18,13 @@ const (
 )
 
 const (
-	sso_service_discord = 1
+	dungeonplan_version = "0.1"
+	systemrole_admin    = 0
+	systemrole_user     = 1
 )
 
 const (
-	dungeonplan_version = "0.1"
+	sso_service_discord = 1
 )
 
 var (

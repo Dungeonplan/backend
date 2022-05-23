@@ -145,9 +145,19 @@ func (env *Env) handleLoginDiscordCallback(w http.ResponseWriter, r *http.Reques
 		var userID int64 = -1
 
 		if checkRowsCount(rows) == 0 {
-			stmt, err := env.database.Prepare("INSERT INTO user(email, username, discordid, discordavatar, locale) VALUES (?, ?, ?, ?, ?);")
+			rowsUser, err := env.database.Query("SELECT id FROM user")
 			checkErr(err)
-			result, err := stmt.Exec(result.EMail, result.Username, result.ID, result.Avatar, result.Locale)
+
+			var role int
+			if checkRowsCount(rowsUser) == 0 {
+				role = systemrole_admin
+			} else {
+				role = systemrole_user
+			}
+
+			stmt, err := env.database.Prepare("INSERT INTO user(email, username, discordid, discordavatar, locale, role) VALUES (?, ?, ?, ?, ?, ?);")
+			checkErr(err)
+			result, err := stmt.Exec(result.EMail, result.Username, result.ID, result.Avatar, result.Locale, role)
 			checkErr(err)
 			userID, err = result.LastInsertId()
 			checkErr(err)
