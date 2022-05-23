@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -26,7 +27,7 @@ type TokenExchangeResponse struct {
 
 type Claims struct {
 	UserID int `json:"userid"`
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 }
 
 func (env *Env) authorized(w http.ResponseWriter, r *http.Request) bool {
@@ -111,9 +112,9 @@ func (env *Env) handleLoginDiscordCallback(w http.ResponseWriter, r *http.Reques
 		var token *oauth2.Token
 
 		if env.environment == "dev" {
-			token, err = discordOAuthConfigDev.Exchange(oauth2.NoContext, code)
+			token, err = discordOAuthConfigDev.Exchange(context.Background(), code)
 		} else {
-			token, err = discordOAuthConfigProd.Exchange(oauth2.NoContext, code)
+			token, err = discordOAuthConfigProd.Exchange(context.Background(), code)
 		}
 		checkErr(err)
 
@@ -235,9 +236,9 @@ func (env *Env) handleTokenExchange(w http.ResponseWriter, r *http.Request) {
 	// Create new JWT Token
 	claims := &Claims{
 		UserID: userid,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Second * time.Duration(jwt_expiry)).Unix(),
-			IssuedAt:  time.Now().Unix(),
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * time.Duration(jwt_expiry))),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
 
