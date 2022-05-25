@@ -180,7 +180,7 @@ func (env *Env) handleLoginDiscordCallback(w http.ResponseWriter, r *http.Reques
 			return
 		}
 
-		_, err = stmt.Exec(authToken, userID, time.Now().Add(time.Minute*time.Duration(60)).Unix())
+		_, err = stmt.Exec(authToken, userID, time.Now().Add(time.Minute*time.Duration(exchange_token_expiry)).Unix())
 		checkErr(err)
 		http.Redirect(w, r, authorizeURL+authToken, http.StatusTemporaryRedirect)
 	} else {
@@ -300,7 +300,8 @@ func (env *Env) handleTokenExchange(w http.ResponseWriter, r *http.Request) {
 
 	var roleID int
 	row = env.database.QueryRow("SELECT role FROM user WHERE id = ?", userid)
-	row.Scan(&roleID)
+	err = row.Scan(&roleID)
+	checkErr(err)
 
 	rows, err = env.database.Query("SELECT action.id, action.short_name, action.description FROM role_action INNER JOIN action ON role_action.action_id = action.id WHERE role_action.role_id = ?", roleID)
 	checkErr(err)
@@ -312,7 +313,7 @@ func (env *Env) handleTokenExchange(w http.ResponseWriter, r *http.Request) {
 		actions = append(actions, action)
 	}
 
-	rows, err = env.database.Query("SELECT id, short_name, description, hierarchy, system FROM role ORDER BY hierarchy ASC")
+	rows, err = env.database.Query("SELECT id, short_name, description, hierarchy, system FROM role ORDER BY hierarchy")
 	checkErr(err)
 	var roles []role
 	for rows.Next() {
