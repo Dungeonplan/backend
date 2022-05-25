@@ -19,8 +19,8 @@ const (
 
 const (
 	dungeonplan_version = "0.1"
-	systemrole_admin    = 0
-	systemrole_user     = 1
+	systemrole_admin    = 1
+	systemrole_user     = 2
 )
 
 const (

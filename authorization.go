@@ -277,12 +277,57 @@ func (env *Env) handleTokenExchange(w http.ResponseWriter, r *http.Request) {
 	_, err = stmt.Exec(tokenID)
 	checkErr(err)
 
-	//Return JWT Token
-	type JWTResponse struct {
-		Token string `json:"token"`
+	type role struct {
+		ID          int    `json:"id"`
+		ShortName   string `json:"short_name"`
+		Description string `json:"description"`
+		Hierarchy   int    `json:"hierarchy"`
+		System      bool   `json:"system"`
 	}
 
-	body := JWTResponse{Token: jwtTokenString}
+	type action struct {
+		ID          int    `json:"id"`
+		ShortName   string `json:"short_name"`
+		Description string `json:"description"`
+	}
+
+	//Return JWT Token
+	type jwtResponse struct {
+		Token   string   `json:"token"`
+		Actions []action `json:"user_actions"`
+		Roles   []role   `json:"roles"`
+	}
+
+	var roleID int
+	row = env.database.QueryRow("SELECT role FROM user WHERE id = ?", userid)
+	row.Scan(&roleID)
+
+	rows, err = env.database.Query("SELECT action.id, action.short_name, action.description FROM role_action INNER JOIN action ON role_action.action_id = action.id WHERE role_action.role_id = ?", roleID)
+	checkErr(err)
+	var actions []action
+	for rows.Next() {
+		action := action{}
+		err = rows.Scan(&action.ID, &action.ShortName, &action.Description)
+		checkErr(err)
+		actions = append(actions, action)
+	}
+
+	rows, err = env.database.Query("SELECT id, short_name, description, hierarchy, system FROM role ORDER BY hierarchy ASC")
+	checkErr(err)
+	var roles []role
+	for rows.Next() {
+		role := role{}
+		var system int
+		err = rows.Scan(&role.ID, &role.ShortName, &role.Description, &role.Hierarchy, &system)
+		if system == 0 {
+			role.System = false
+		} else {
+			role.System = true
+		}
+		roles = append(roles, role)
+	}
+
+	body := jwtResponse{Token: jwtTokenString, Actions: actions, Roles: roles}
 
 	jsn, err := json.Marshal(body)
 	checkErr(err)

@@ -7,7 +7,7 @@ paths:
   /api/logindiscord:
     get:
       summary: Redirect to Discord SSO
-      tags: 
+      tags:
         - OAuth2
         - Discord
       responses:
@@ -16,7 +16,7 @@ paths:
   /api/logindiscordcallback:
     get:
       summary: Callback address for Discord SSO.
-      parameters: 
+      parameters:
         - in: query
           name: state
           schema:
@@ -46,9 +46,9 @@ paths:
         - Authorization
         - OAuth2
       responses:
-        '401': 
+        '401':
           description: Token not found, Token already used, Token was expired
-        '200': 
+        '200':
           description: New JWT Token was successfully created and returned
           content:
             application/json:
@@ -57,7 +57,7 @@ paths:
   /api/logout:
     get:
       summary: Endpoint to invalidate a jwt token.
-      security: 
+      security:
         - BearerAuth: []
       tags:
         - Authorization
@@ -84,13 +84,37 @@ components:
       properties:
         token:
           type: string
+        user_actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserAction'
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+    UserAction:
+      properties:
+        id:
+          type: integer
+        short_name:
+          type: string
+        description:
+          type: string
+    Role:
+      properties:
+        id:
+          type: integer
+        short_name:
+          type: string
+        description:
+          type: string
+        hierarchy:
+          type: integer
+        system:
+          type: boolean
     SuccessResponse:
       properties:
         success:
           type: boolean
         description:
           type: string
-servers:
-  # Added by API Auto Mocking Plugin
-  - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/b1ue/Dungeonplan/1.0
