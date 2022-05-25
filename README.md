@@ -10,8 +10,13 @@ This is the backend for Dungeonplan, written in GoLang.
   - DUNGEONPLAN_PRESHARED_KEY - A random string with at least 128 characters for JWT creation
   - DUNGEONPLAN_ENV - "dev" or "prod", to switch between configs (see config.go)
 ## Running / Building
+- Clone Repository
 - Download dependencies
   - go get github.com/golang-jwt/jwt/v4
   - go get golang.org/x/oauth2
 - go build *.go
 - (Optional) ./backend
+## How to contribute
+- Fork Repository
+- Develop your Features
+- Create a Pull Request
