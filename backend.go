@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -32,7 +33,7 @@ func setupEnv() *Env {
 }
 
 func main() {
-	log("Starting Dungeonplan Backend v" + dungeonplan_version)
+	log(fmt.Sprintf("Starting Dungeonplan Backend v%s (Build %d)", dungeonplan_version, dungeonplan_build))
 	env := setupEnv()
 
 	c := make(chan os.Signal, 1)
@@ -51,6 +52,7 @@ func main() {
 	http.HandleFunc("/api/logindiscordcallback", env.handleLoginDiscordCallback)
 	http.HandleFunc("/api/tokenexchange", env.handleTokenExchange)
 	http.HandleFunc("/api/logout", env.handleLogout)
+	http.HandleFunc("/api/version", env.handleVersion)
 	err := http.ListenAndServe(":8123", nil)
 	checkErr(err)
 }
