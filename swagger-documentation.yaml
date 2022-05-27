@@ -70,6 +70,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
+  /api/version:
+    get:
+      summary: Endpoint to get current version (will be removed on productive)
+      tags:
+        - misc
+      responses:
+        '200':
+          description: Version could be retrieved
+          content:
+            applicatio/json:
+              schema:
+                $ref: '#/components/schemas/VersionResponse'
 components:
   securitySchemes:
     BearerAuth:
@@ -80,10 +92,12 @@ components:
       properties:
         token:
           type: string
+          example: '4hHAGFLbSstOeHSEwmdRSSK7F3lZynFT'
     TokenexchangeResponse:
       properties:
         token:
           type: string
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
         user_actions:
           type: array
           items:
@@ -96,25 +110,43 @@ components:
       properties:
         id:
           type: integer
+          example: 0
         short_name:
           type: string
+          example: 'can_kill_unicorns'
         description:
           type: string
+          example: 'User is authorized to kill unicorns.'
     Role:
       properties:
         id:
           type: integer
+          example: 0
         short_name:
           type: string
+          example: 'admin'
         description:
           type: string
+          example: 'Global Admin role.'
         hierarchy:
           type: integer
+          example: 0
         system:
           type: boolean
+          example: true
+    VersionResponse:
+      properties:
+        version:
+          type: string
+          example: "1.0"
+        build:
+          type: integer
+          example: 1337
     SuccessResponse:
       properties:
         success:
           type: boolean
+          example: true
         description:
           type: string
+          example: 'Action was successful.'
