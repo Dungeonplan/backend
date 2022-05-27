@@ -48,11 +48,18 @@ func main() {
 		}
 	}()
 
+	//OAuth2 & Authorization
 	http.HandleFunc("/api/logindiscord", env.handleLoginDiscord)
 	http.HandleFunc("/api/logindiscordcallback", env.handleLoginDiscordCallback)
 	http.HandleFunc("/api/tokenexchange", env.handleTokenExchange)
 	http.HandleFunc("/api/logout", env.handleLogout)
+
+	//Roles and Actions
+	http.HandleFunc("/api/role", env.handleRoleCreation)
+
+	//misc
 	http.HandleFunc("/api/version", env.handleVersion)
+
 	err := http.ListenAndServe(":8123", nil)
 	checkErr(err)
 }

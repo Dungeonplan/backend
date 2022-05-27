@@ -30,7 +30,7 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func (env *Env) authorized(w http.ResponseWriter, r *http.Request) bool {
+func (env *Env) authenticated(w http.ResponseWriter, r *http.Request) bool {
 	jwtToken := extractBearerToken(r.Header.Get("Authorization"))
 
 	// Return 401 if no Token was submitted
@@ -58,6 +58,17 @@ func (env *Env) authorized(w http.ResponseWriter, r *http.Request) bool {
 	}
 
 	return true
+}
+
+func (env *Env) authorized(jwtToken string, action string) bool {
+	rows, err := env.database.Query(`SELECT COUNT(*)  FROM jwt_token
+									LEFT JOIN user ON jwt_token.user_id = user.id
+									LEFT JOIN role_action ON role_action.role_id = user.role
+									LEFT JOIN action ON role_action.action_id = action.id
+									WHERE jwt_token.jwt_token = ?
+									AND action.short_name = ?`, jwtToken, action)
+	checkErr(err)
+	return checkRowsCount(rows) == 1
 }
 
 func (env *Env) wasTokenInvalidated(token string) bool {
@@ -344,8 +355,8 @@ func (env *Env) handleLogout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Return 401 if user is not authorized
-	if !env.authorized(w, r) {
+	// Return 401 if user is not authenticated
+	if !env.authenticated(w, r) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
