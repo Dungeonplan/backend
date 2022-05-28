@@ -55,7 +55,7 @@ func main() {
 	http.HandleFunc("/api/logout", env.handleLogout)
 
 	//Roles and Actions
-	http.HandleFunc("/api/role", env.handleRoleCreation)
+	http.HandleFunc("/api/addrole", env.handleRoleCreation)
 
 	//misc
 	http.HandleFunc("/api/version", env.handleVersion)

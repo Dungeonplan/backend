@@ -21,10 +21,6 @@ type DiscordLoginResponse struct {
 	EMail    string `json:"email"`
 }
 
-type TokenExchangeResponse struct {
-	Token string `json:"token"`
-}
-
 type Claims struct {
 	UserID int `json:"userid"`
 	jwt.RegisteredClaims
@@ -206,13 +202,17 @@ func (env *Env) handleTokenExchange(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var resp TokenExchangeResponse
+	type tokenExchangeRequest struct {
+		Token string `json:"token"`
+	}
+
+	var req tokenExchangeRequest
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
-	err := decoder.Decode(&resp)
+	err := decoder.Decode(&req)
 
-	if err != nil || resp.Token == "" {
+	if err != nil || req.Token == "" {
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		} else {
@@ -221,7 +221,7 @@ func (env *Env) handleTokenExchange(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows, err := env.database.Query("SELECT COUNT(*) FROM authorize_token WHERE token = ?", resp.Token)
+	rows, err := env.database.Query("SELECT COUNT(*) FROM authorize_token WHERE token = ?", req.Token)
 	checkErr(err)
 	rowsCount := checkRowsCount(rows)
 
@@ -236,7 +236,7 @@ func (env *Env) handleTokenExchange(w http.ResponseWriter, r *http.Request) {
 	var used bool
 	var expiry int
 
-	row := env.database.QueryRow("SELECT id, user_id, used, expiry FROM authorize_token WHERE token = ?", resp.Token)
+	row := env.database.QueryRow("SELECT id, user_id, used, expiry FROM authorize_token WHERE token = ?", req.Token)
 	err = row.Scan(&tokenID, &userid, &used, &expiry)
 	checkErr(err)
 

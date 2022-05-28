@@ -82,6 +82,32 @@ paths:
             applicatio/json:
               schema:
                 $ref: '#/components/schemas/VersionResponse'
+  /api/addrole:
+    post:
+      summary: Endpoint to add new roles
+      security:
+        - BearerAuth: []
+      tags:
+        - Access Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddRoleRequest'
+      responses:
+        '401':
+          description: Wrong request or shortname already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '200':
+          description: Role was added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 components:
   securitySchemes:
     BearerAuth:
@@ -106,6 +132,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Role'
+    AddRoleRequest:
+      properties:
+        short_name:
+          type: string
+          example: 'dungeonmaster'
+        description:
+          type: string
+          example: 'User is a dungeonmaster'
+        hierarchy:
+          type: integer
+          example: 42
     UserAction:
       properties:
         id:

@@ -13,7 +13,7 @@ const (
 )
 
 const (
-	exchange_token_expiry = 60   // Seconds
+	exchange_token_expiry = 600  // Seconds
 	jwt_expiry            = 3600 // Seconds
 )
 
@@ -26,6 +26,12 @@ const (
 
 const (
 	sso_service_discord = 1
+)
+
+const (
+	action_role_add    = "role_add"
+	action_role_delete = "role_delete"
+	action_role_update = "role_modify"
 )
 
 var (
