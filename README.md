@@ -14,6 +14,7 @@ This is the backend for Dungeonplan, written in GoLang.
 - Download dependencies
   - go get github.com/golang-jwt/jwt/v4
   - go get golang.org/x/oauth2
+  - go get github.com/gorilla/mux
 - go build *.go
 - (Optional) ./backend
 ## How to contribute

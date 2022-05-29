@@ -75,11 +75,6 @@ func (env *Env) wasTokenInvalidated(token string) bool {
 }
 
 func (env *Env) handleLoginDiscord(w http.ResponseWriter, r *http.Request) {
-	// Accept only GET
-	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
 	state, err := security.GenerateRandomString(32)
 	checkErr(err)
 
@@ -100,11 +95,6 @@ func (env *Env) handleLoginDiscord(w http.ResponseWriter, r *http.Request) {
 }
 
 func (env *Env) handleLoginDiscordCallback(w http.ResponseWriter, r *http.Request) {
-	// Accept only GET
-	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
 	state := r.FormValue("state")
 	code := r.FormValue("code")
 	rows, err := env.database.Query("SELECT COUNT(*) FROM oauth2_state WHERE state = ?", state)
@@ -196,12 +186,6 @@ func (env *Env) handleLoginDiscordCallback(w http.ResponseWriter, r *http.Reques
 }
 
 func (env *Env) handleTokenExchange(w http.ResponseWriter, r *http.Request) {
-	//Accept only POST
-	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
-
 	type tokenExchangeRequest struct {
 		Token string `json:"token"`
 	}
@@ -349,12 +333,6 @@ func (env *Env) handleTokenExchange(w http.ResponseWriter, r *http.Request) {
 }
 
 func (env *Env) handleLogout(w http.ResponseWriter, r *http.Request) {
-	// Accept only GET
-	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
-
 	// Return 401 if user is not authenticated
 	if !env.authenticated(w, r) {
 		w.WriteHeader(http.StatusUnauthorized)
