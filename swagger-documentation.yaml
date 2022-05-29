@@ -134,7 +134,34 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
         '401':
           description: Not authorized.
-
+  /api/updateroles:
+    patch:
+      summary: Updates roles
+      security:
+        - BearerAuth: []
+      tags:
+        - Access Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRolesRequest'
+      responses:
+        '200':
+          description: Role were updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Bad Format or Duplicate Hierarchies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          description: Not authorized.
 components:
   securitySchemes:
     BearerAuth:
@@ -170,6 +197,20 @@ components:
         hierarchy:
           type: integer
           example: 42
+    UpdateRolesRequest:
+      properties:
+        id:
+          type: integer
+          example: 1
+        short_name:
+          type: string
+          example: "admin"
+        description:
+          type: string
+          example:  "Role for admins"
+        hierarchy:
+          type: integer
+          example: 5
     UserAction:
       properties:
         id:
