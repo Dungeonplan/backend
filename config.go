@@ -9,7 +9,7 @@ import (
 const (
 	baseURL      = "https://test.dungeonplan.de"
 	errorPageURL = baseURL + "/error"
-	authorizeURL = baseURL + "/authorize?token="
+	authorizeURL = baseURL + "/authorize/"
 )
 
 const (
