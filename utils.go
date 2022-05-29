@@ -34,3 +34,23 @@ func extractBearerToken(authorizationString string) string {
 func log(message string) {
 	fmt.Println(time.Now().Format("02.01.2006 - 15:04:05") + ": " + message)
 }
+
+func hasIntSliceDuplicates(arr []int) bool {
+	var newArray []int
+	for _, a := range arr {
+		if valueInSlice(a, newArray) {
+			return true
+		}
+		newArray = append(newArray, a)
+	}
+	return len(newArray) != len(arr)
+}
+
+func valueInSlice[T comparable](value interface{}, arr []T) bool {
+	for _, a := range arr {
+		if a == value {
+			return true
+		}
+	}
+	return false
+}

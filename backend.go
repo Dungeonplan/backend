@@ -54,6 +54,7 @@ func main() {
 	//Roles and Actions
 	router.HandleFunc("/api/addrole", env.handleRoleCreation).Methods("POST")
 	router.HandleFunc("/api/deleterole/{roleid}", env.handleRoleDeletion).Methods("DELETE")
+	router.HandleFunc("/api/updateroles", env.handleRoleUpdates).Methods("PATCH")
 
 	//misc
 	router.HandleFunc("/api/version", env.handleVersion)

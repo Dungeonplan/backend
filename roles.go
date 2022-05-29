@@ -137,3 +137,72 @@ func (env *Env) handleRoleDeletion(w http.ResponseWriter, r *http.Request) {
 	_, err = w.Write(jsn)
 	checkErr(err)
 }
+
+func (env *Env) handleRoleUpdates(w http.ResponseWriter, r *http.Request) {
+	// Return 401 if user is not authenticated
+	if !env.authenticated(w, r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	jwtToken := extractBearerToken(r.Header.Get("Authorization"))
+
+	// Return 401 if user has no rights to add roles
+	if !env.authorized(jwtToken, action_role_update) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	type updateRolesRequest struct {
+		ID          int    `json:"id"`
+		ShortName   string `json:"short_name"`
+		Description string `json:"description"`
+		Hierarchy   int    `json:"hierarchy"`
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	var updates []updateRolesRequest
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	err := decoder.Decode(&updates)
+	if err != nil {
+		checkErr(err)
+		body := SuccessResponse{Success: false, Description: "Could not update rules. Could not parse request."}
+		jsn, err := json.Marshal(body)
+		checkErr(err)
+		w.WriteHeader(http.StatusBadRequest)
+		_, err = w.Write(jsn)
+		checkErr(err)
+		return
+	}
+
+	var hierarchy []int
+	for _, v := range updates {
+		hierarchy = append(hierarchy, v.Hierarchy)
+	}
+
+	if hasIntSliceDuplicates(hierarchy) {
+		body := SuccessResponse{Success: false, Description: "Could not update rules. Duplicate hierarchies."}
+		jsn, err := json.Marshal(body)
+		checkErr(err)
+		w.WriteHeader(http.StatusBadRequest)
+		_, err = w.Write(jsn)
+		checkErr(err)
+		return
+	}
+
+	for _, v := range updates {
+		stmt, err := env.database.Prepare("UPDATE role SET short_name = ?, description = ?, hierarchy = ? WHERE id = ?")
+		checkErr(err)
+		_, err = stmt.Exec(v.ShortName, v.Description, v.Hierarchy, v.ID)
+		checkErr(err)
+	}
+
+	body := SuccessResponse{Success: true, Description: "Roled updated successfully."}
+	jsn, err := json.Marshal(body)
+	checkErr(err)
+	_, err = w.Write(jsn)
+	checkErr(err)
+}
