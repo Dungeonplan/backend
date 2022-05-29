@@ -13,8 +13,9 @@ const (
 )
 
 const (
-	exchange_token_expiry = 600  // Seconds
-	jwt_expiry            = 3600 // Seconds
+	exchange_token_expiry = 60 // Seconds
+	// TODO: Reduce to 1 hour
+	jwt_expiry = 3600 * 24 // Seconds
 )
 
 const (
