@@ -121,8 +121,7 @@ func (env *Env) handleRoleDeletion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Add "ON DELETE CASCADE"
-	// DELETE Role
+	// Delete Role
 	stmt, err := env.database.Prepare("DELETE FROM role WHERE id = ?")
 	checkErr(err)
 	_, err = stmt.Exec(roleID)
