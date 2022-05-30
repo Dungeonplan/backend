@@ -26,7 +26,19 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
+func (env *Env) getBaseURL() string {
+	if env.environment == "dev" {
+		return baseURLDev
+	} else {
+		return baseURLProd
+	}
+}
+
 func (env *Env) authenticated(w http.ResponseWriter, r *http.Request) bool {
+	env.enableCors(&w)
+	if (*r).Method == "OPTIONS" {
+		return false
+	}
 	jwtToken := extractBearerToken(r.Header.Get("Authorization"))
 
 	// Return 401 if no Token was submitted
@@ -75,6 +87,10 @@ func (env *Env) wasTokenInvalidated(token string) bool {
 }
 
 func (env *Env) handleLoginDiscord(w http.ResponseWriter, r *http.Request) {
+	env.enableCors(&w)
+	if (*r).Method == "OPTIONS" {
+		return
+	}
 	state, err := security.GenerateRandomString(32)
 	checkErr(err)
 
@@ -95,6 +111,10 @@ func (env *Env) handleLoginDiscord(w http.ResponseWriter, r *http.Request) {
 }
 
 func (env *Env) handleLoginDiscordCallback(w http.ResponseWriter, r *http.Request) {
+	env.enableCors(&w)
+	if (*r).Method == "OPTIONS" {
+		return
+	}
 	state := r.FormValue("state")
 	code := r.FormValue("code")
 	rows, err := env.database.Query("SELECT COUNT(*) FROM oauth2_state WHERE state = ?", state)
@@ -173,19 +193,23 @@ func (env *Env) handleLoginDiscordCallback(w http.ResponseWriter, r *http.Reques
 
 		// If user could not be added, for some reason. Should not happen
 		if userID == -1 {
-			http.Redirect(w, r, errorPageURL, http.StatusTemporaryRedirect)
+			http.Redirect(w, r, env.getBaseURL()+errorPageURL, http.StatusTemporaryRedirect)
 			return
 		}
 
 		_, err = stmt.Exec(authToken, userID, time.Now().Add(time.Minute*time.Duration(exchange_token_expiry)).Unix())
 		checkErr(err)
-		http.Redirect(w, r, authorizeURL+authToken, http.StatusTemporaryRedirect)
+		http.Redirect(w, r, env.getBaseURL()+authorizeURL+authToken, http.StatusTemporaryRedirect)
 	} else {
-		http.Redirect(w, r, errorPageURL, http.StatusTemporaryRedirect)
+		http.Redirect(w, r, env.getBaseURL()+errorPageURL, http.StatusTemporaryRedirect)
 	}
 }
 
 func (env *Env) handleTokenExchange(w http.ResponseWriter, r *http.Request) {
+	env.enableCors(&w)
+	if (*r).Method == "OPTIONS" {
+		return
+	}
 	type tokenExchangeRequest struct {
 		Token string `json:"token"`
 	}
@@ -333,6 +357,10 @@ func (env *Env) handleTokenExchange(w http.ResponseWriter, r *http.Request) {
 }
 
 func (env *Env) handleLogout(w http.ResponseWriter, r *http.Request) {
+	env.enableCors(&w)
+	if (*r).Method == "OPTIONS" {
+		return
+	}
 	// Return 401 if user is not authenticated
 	if !env.authenticated(w, r) {
 		w.WriteHeader(http.StatusUnauthorized)

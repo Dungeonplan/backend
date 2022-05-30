@@ -7,9 +7,10 @@ import (
 )
 
 const (
-	baseURL      = "https://test.dungeonplan.de"
-	errorPageURL = baseURL + "/error"
-	authorizeURL = baseURL + "/authorize/"
+	baseURLDev   = "http://localhost:4200"
+	baseURLProd  = "https://test.dungeonplan.de"
+	errorPageURL = "/error"
+	authorizeURL = "/authorize/"
 )
 
 const (
@@ -47,7 +48,7 @@ var (
 		},
 	}
 	discordOAuthConfigProd = &oauth2.Config{
-		RedirectURL:  baseURL + "/api/logindiscordcallback",
+		RedirectURL:  baseURLProd + "/api/logindiscordcallback",
 		ClientID:     os.Getenv("DUNGEONPLAN_DISCORD_CLIENT_ID"),
 		ClientSecret: os.Getenv("DUNGEONPLAN_DISCORD_CLIENT_SECRET"),
 		Scopes:       []string{"email"},

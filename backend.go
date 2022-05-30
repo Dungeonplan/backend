@@ -46,15 +46,15 @@ func main() {
 	router := mux.NewRouter()
 
 	//OAuth2 & Authorization
-	router.HandleFunc("/api/logindiscord", env.handleLoginDiscord).Methods("GET")
-	router.HandleFunc("/api/logindiscordcallback", env.handleLoginDiscordCallback).Methods("GET")
-	router.HandleFunc("/api/tokenexchange", env.handleTokenExchange).Methods("POST")
-	router.HandleFunc("/api/logout", env.handleLogout).Methods("GET")
+	router.HandleFunc("/api/logindiscord", env.handleLoginDiscord).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/logindiscordcallback", env.handleLoginDiscordCallback).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/tokenexchange", env.handleTokenExchange).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/logout", env.handleLogout).Methods("GET", "OPTIONS")
 
 	//Roles and Actions
-	router.HandleFunc("/api/addrole", env.handleRoleCreation).Methods("POST")
-	router.HandleFunc("/api/deleterole/{roleid}", env.handleRoleDeletion).Methods("DELETE")
-	router.HandleFunc("/api/updateroles", env.handleRoleUpdates).Methods("PATCH")
+	router.HandleFunc("/api/addrole", env.handleRoleCreation).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/deleterole/{roleid}", env.handleRoleDeletion).Methods("DELETE", "OPTIONS")
+	router.HandleFunc("/api/updateroles", env.handleRoleUpdates).Methods("PATCH", "OPTIONS")
 
 	//misc
 	router.HandleFunc("/api/version", env.handleVersion)
