@@ -19,8 +19,7 @@ jobs:
         go-version: 1.18
 
     - name: Download Dependencies
-      run: go get github.com/golang-jwt/jwt/v4 github.com/gorilla/mux 
-github.com/mattn/go-sqlite3 golang.org/x/oauth2
+      run: go get github.com/golang-jwt/jwt/v4 github.com/gorilla/mux github.com/mattn/go-sqlite3 golang.org/x/oauth2
       
     - name: Build
       run: go build -v ./...
