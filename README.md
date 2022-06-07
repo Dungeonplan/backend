@@ -1,5 +1,6 @@
 # Dungeonplan Backend 
 This is the backend for Dungeonplan, written in GoLang.
+
 Feel free to contribute.
 ## Prerequisites for Running
 - Go v1.18+
