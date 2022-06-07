@@ -2,9 +2,9 @@ name: Go
 
 on:
   push:
-    branches: [ "feature/github_action" ]
+    branches: [ "develop" ]
   pull_request:
-    branches: [ "feature/github_action" ]
+    branches: [ "develop" ]
 
 jobs:
 
