@@ -17,7 +17,7 @@ func AssertAvailablePRNG() {
 
 	_, err := io.ReadFull(rand.Reader, buf)
 	if err != nil {
-		panic(fmt.Sprintf("crypto/rand is unavailable: Read() failed with %#v", err))
+		fmt.Println(fmt.Sprintf("crypto/rand is unavailable: Read() failed with %#v", err))
 	}
 }
 

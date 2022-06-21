@@ -153,7 +153,7 @@ func (env *Env) handleLoginDiscordCallback(w http.ResponseWriter, r *http.Reques
 
 		var result DiscordLoginResponse
 		if err := json.Unmarshal(body, &result); err != nil {
-			panic("Could not parse answer from Discord API: " + err.Error())
+			log("Could not parse answer from Discord API: " + err.Error())
 		}
 
 		rows, err = env.database.Query("SELECT COUNT(*) FROM user WHERE email = ?", result.EMail)
