@@ -21,7 +21,7 @@ const (
 
 const (
 	dungeonplan_version = "0.1"
-	dungeonplan_build   = 2
+	dungeonplan_build   = 4
 	systemrole_admin    = 1
 	systemrole_user     = 2
 )
@@ -41,7 +41,7 @@ var (
 		RedirectURL:  "http://localhost:8123/api/logindiscordcallback",
 		ClientID:     os.Getenv("DUNGEONPLAN_DISCORD_CLIENT_ID"),
 		ClientSecret: os.Getenv("DUNGEONPLAN_DISCORD_CLIENT_SECRET"),
-		Scopes:       []string{"email"},
+		Scopes:       []string{"identify", "email"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://discord.com/api/oauth2/authorize",
 			TokenURL: "https://discord.com/api/oauth2/token",
@@ -51,7 +51,7 @@ var (
 		RedirectURL:  baseURLProd + "/api/logindiscordcallback",
 		ClientID:     os.Getenv("DUNGEONPLAN_DISCORD_CLIENT_ID"),
 		ClientSecret: os.Getenv("DUNGEONPLAN_DISCORD_CLIENT_SECRET"),
-		Scopes:       []string{"email"},
+		Scopes:       []string{"identify", "email"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://discord.com/api/oauth2/authorize",
 			TokenURL: "https://discord.com/api/oauth2/token",

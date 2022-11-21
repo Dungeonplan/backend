@@ -106,7 +106,6 @@ func (env *Env) handleLoginDiscord(w http.ResponseWriter, r *http.Request) {
 	} else {
 		url = discordOAuthConfigProd.AuthCodeURL(state)
 	}
-
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
@@ -199,7 +198,7 @@ func (env *Env) handleLoginDiscordCallback(w http.ResponseWriter, r *http.Reques
 
 		_, err = stmt.Exec(authToken, userID, time.Now().Add(time.Minute*time.Duration(exchange_token_expiry)).Unix())
 		checkErr(err)
-		http.Redirect(w, r, env.getBaseURL()+authorizeURL+authToken, http.StatusTemporaryRedirect)
+		http.Redirect(w, r, env.getBaseURL()+authorizeURL+"discord/"+authToken, http.StatusTemporaryRedirect)
 	} else {
 		http.Redirect(w, r, env.getBaseURL()+errorPageURL, http.StatusTemporaryRedirect)
 	}
@@ -296,30 +295,38 @@ func (env *Env) handleTokenExchange(w http.ResponseWriter, r *http.Request) {
 	_, err = stmt.Exec(tokenID)
 	checkErr(err)
 
-	type role struct {
-		ID          int    `json:"id"`
-		ShortName   string `json:"short_name"`
-		Description string `json:"description"`
-		Hierarchy   int    `json:"hierarchy"`
-		System      bool   `json:"system"`
-	}
-
 	type action struct {
 		ID          int    `json:"id"`
 		ShortName   string `json:"short_name"`
 		Description string `json:"description"`
 	}
 
-	//Return JWT Token
-	type jwtResponse struct {
-		Token   string   `json:"token"`
-		Actions []action `json:"user_actions"`
-		Roles   []role   `json:"roles"`
+	type role struct {
+		ID          int      `json:"id"`
+		ShortName   string   `json:"short_name"`
+		Description string   `json:"description"`
+		Hierarchy   int      `json:"hierarchy"`
+		System      bool     `json:"system"`
+		Actions     []action `json:"actions"`
 	}
 
+	//Return JWT Token
+	type jwtResponse struct {
+		Token    string `json:"token"`
+		UserID   int    `json:"userid"`
+		Username string `json:"username"`
+		Locale   string `json:"locale"`
+		Role     role   `json:"role"`
+		Email    string `json:"email"`
+	}
+
+	var email string
+	var username string
+	var locale string
 	var roleID int
-	row = env.database.QueryRow("SELECT role FROM user WHERE id = ?", userid)
-	err = row.Scan(&roleID)
+
+	row = env.database.QueryRow("SELECT email, username, locale, role FROM user WHERE id = ?", userid)
+	err = row.Scan(&email, &username, &locale, &roleID)
 	checkErr(err)
 
 	rows, err = env.database.Query("SELECT action.id, action.short_name, action.description FROM role_action INNER JOIN action ON role_action.action_id = action.id WHERE role_action.role_id = ?", roleID)
@@ -332,22 +339,13 @@ func (env *Env) handleTokenExchange(w http.ResponseWriter, r *http.Request) {
 		actions = append(actions, action)
 	}
 
-	rows, err = env.database.Query("SELECT id, short_name, description, hierarchy, system FROM role ORDER BY hierarchy")
+	roleObject := role{}
+	row = env.database.QueryRow("SELECT * FROM role WHERE id = ?", roleID)
+	err = row.Scan(&roleObject.ID, &roleObject.ShortName, &roleObject.Description, &roleObject.Hierarchy, &roleObject.System)
 	checkErr(err)
-	var roles []role
-	for rows.Next() {
-		role := role{}
-		var system int
-		err = rows.Scan(&role.ID, &role.ShortName, &role.Description, &role.Hierarchy, &system)
-		if system == 0 {
-			role.System = false
-		} else {
-			role.System = true
-		}
-		roles = append(roles, role)
-	}
+	roleObject.Actions = actions
 
-	body := jwtResponse{Token: jwtTokenString, Actions: actions, Roles: roles}
+	body := jwtResponse{Token: jwtTokenString, UserID: userid, Username: username, Locale: locale, Role: roleObject, Email: email}
 
 	jsn, err := json.Marshal(body)
 	checkErr(err)

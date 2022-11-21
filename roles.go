@@ -2,10 +2,73 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
 )
+
+func (env *Env) handleGetRoles(w http.ResponseWriter, r *http.Request) {
+	env.enableCors(&w)
+	if (*r).Method == "OPTIONS" {
+		return
+	}
+
+	// Return 401 if user is not authenticated
+	if !env.authenticated(w, r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	// TODO: doppelt vorhanden (siehe authorization.go)
+	type action struct {
+		ID          int    `json:"id"`
+		ShortName   string `json:"short_name"`
+		Description string `json:"description"`
+	}
+
+	type role struct {
+		ID          int      `json:"id"`
+		ShortName   string   `json:"short_name"`
+		Description string   `json:"description"`
+		Hierarchy   int      `json:"hierarchy"`
+		System      bool     `json:"system"`
+		Actions     []action `json:"actions"`
+	}
+
+	rows, err := env.database.Query("SELECT id, short_name, description, hierarchy, system FROM role ORDER BY hierarchy")
+	checkErr(err)
+	var roles []role
+	for rows.Next() {
+		role := role{}
+		var system int
+		err = rows.Scan(&role.ID, &role.ShortName, &role.Description, &role.Hierarchy, &system)
+		if system == 0 {
+			role.System = false
+		} else {
+			role.System = true
+		}
+
+		rows_action, err := env.database.Query("SELECT action.id, action.short_name, action.description FROM role_action INNER JOIN action ON role_action.action_id = action.id WHERE role_action.role_id = ?", role.ID)
+		checkErr(err)
+		actions := []action{}
+		for rows_action.Next() {
+			action := action{}
+			err = rows_action.Scan(&action.ID, &action.ShortName, &action.Description)
+			checkErr(err)
+			actions = append(actions, action)
+		}
+		role.Actions = actions
+		roles = append(roles, role)
+	}
+
+	jsn, err := json.Marshal(roles)
+	checkErr(err)
+	w.Header().Set("Content-Type", "application/json")
+	_, err = w.Write(jsn)
+	checkErr(err)
+
+}
 
 func (env *Env) handleRoleCreation(w http.ResponseWriter, r *http.Request) {
 	// Return 401 if user is not authenticated
@@ -203,6 +266,42 @@ func (env *Env) handleRoleUpdates(w http.ResponseWriter, r *http.Request) {
 	body := SuccessResponse{Success: true, Description: "Roled updated successfully."}
 	jsn, err := json.Marshal(body)
 	checkErr(err)
+	_, err = w.Write(jsn)
+	checkErr(err)
+}
+
+func (env *Env) handleGetActions(w http.ResponseWriter, r *http.Request) {
+	env.enableCors(&w)
+	if (*r).Method == "OPTIONS" {
+		return
+	}
+
+	// Return 401 if user is not authenticated
+	if !env.authenticated(w, r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	// TODO: Doppelt und dreifach vorhanden
+	type action struct {
+		ID          int    `json:"id"`
+		ShortName   string `json:"short_name"`
+		Description string `json:"description"`
+	}
+
+	rows, err := env.database.Query("SELECT * FROM action ORDER BY short_name ASC")
+	checkErr(err)
+
+	var actions []action
+	for rows.Next() {
+		action := action{}
+		err = rows.Scan(&action.ID, &action.ShortName, &action.Description)
+		actions = append(actions, action)
+	}
+
+	jsn, err := json.Marshal(actions)
+	checkErr(err)
+	w.Header().Set("Content-Type", "application/json")
 	_, err = w.Write(jsn)
 	checkErr(err)
 }

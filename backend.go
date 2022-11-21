@@ -52,9 +52,11 @@ func main() {
 	router.HandleFunc("/api/logout", env.handleLogout).Methods("GET", "OPTIONS")
 
 	//Roles and Actions
+	router.HandleFunc("/api/roles", env.handleGetRoles).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/addrole", env.handleRoleCreation).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/deleterole/{roleid}", env.handleRoleDeletion).Methods("DELETE", "OPTIONS")
 	router.HandleFunc("/api/updateroles", env.handleRoleUpdates).Methods("PATCH", "OPTIONS")
+	router.HandleFunc("/api/actions", env.handleGetActions).Methods("GET", "OPTIONS")
 
 	//misc
 	router.HandleFunc("/api/version", env.handleVersion)
